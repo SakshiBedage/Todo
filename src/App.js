@@ -1,22 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  addTodo,
-  toggleTodo,
-  selectColor,
-  deleteTodo,
-  markAllCompleted,
-  clearCompleted,
-  changeStatusFilter,
-  changeColorFilter,
-} from "./actions";
+import { addTodo, toggleTodo, selectColor, deleteTodo } from "./actions";
+import Footer from "./footer";
 
 const TodoApp = () => {
   const [inputValue, setInputValue] = useState("");
+  const [reducerCallCount, setReducerCallCount] = useState(0);
   const dispatch = useDispatch();
   const todos = useSelector((state) => state.todos);
   const { status, colors } = useSelector((state) => state.filters);
+
+  useEffect(() => {
+    const incrementCount = (count) => {
+      return count + 1;
+    };
+
+    setReducerCallCount(incrementCount);
+  }, [todos.length]);
 
   const handleAddTodo = () => {
     if (inputValue.trim()) {
@@ -35,22 +36,6 @@ const TodoApp = () => {
 
   const handleDeleteTodo = (id) => {
     dispatch(deleteTodo(id));
-  };
-
-  const handleStatusFilterChange = (status) => {
-    dispatch(changeStatusFilter(status));
-  };
-
-  const handleColorFilterChange = (color, changeType) => {
-    dispatch(changeColorFilter(color, changeType));
-  };
-
-  const handleMarkAllCompleted = () => {
-    dispatch(markAllCompleted());
-  };
-
-  const handleClearCompleted = () => {
-    dispatch(clearCompleted());
   };
 
   const filteredTodos = todos.filter((todo) => {
@@ -97,44 +82,10 @@ const TodoApp = () => {
           </li>
         ))}
       </ul>
-      <div className="footer">
-        <div>
-          <span>
-            {filteredTodos.length}{" "}
-            {filteredTodos.length === 1 ? "item" : "items"} left
-          </span>
-          <button onClick={() => handleStatusFilterChange("All")}>All</button>
-          <button onClick={() => handleStatusFilterChange("Active")}>
-            Active
-          </button>
-          <button onClick={() => handleStatusFilterChange("Completed")}>
-            Completed
-          </button>
-        </div>
-        <div className="color-filter">
-          <label>Filter by Color:</label>
-          {["red", "yellow", "green", "blue", "orange", "purple"].map(
-            (color) => (
-              <button
-                key={color}
-                style={{ backgroundColor: color }}
-                onClick={() =>
-                  handleColorFilterChange(
-                    color,
-                    colors.includes(color) ? "removed" : "added"
-                  )
-                }
-              >
-                {color} {colors.includes(color) ? "X" : "+"}
-              </button>
-            )
-          )}
-        </div>
-        <div className="bottom-buttons">
-          <button onClick={handleMarkAllCompleted}>Mark All Completed</button>
-          <button onClick={handleClearCompleted}>Clear Completed</button>
-        </div>
-      </div>
+
+      <Footer />
+
+      <h4>Todo Reducer called {reducerCallCount} times</h4>
     </div>
   );
 };
